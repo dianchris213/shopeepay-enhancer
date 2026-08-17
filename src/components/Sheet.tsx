@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 type Props = {
+  /** Optional DOM id so a trigger can point at the sheet via aria-controls. */
+  id?: string;
   open: boolean;
   onClose: () => void;
   title: string;
@@ -35,7 +37,7 @@ function focusableWithin(panel: HTMLElement) {
   );
 }
 
-export function Sheet({ open, onClose, title, side = "bottom", children }: Props) {
+export function Sheet({ id, open, onClose, title, side = "bottom", children }: Props) {
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
   const sheetId = useId();
@@ -131,7 +133,17 @@ export function Sheet({ open, onClose, title, side = "bottom", children }: Props
         }`;
 
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={title}>
+    <div
+      id={id}
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      /* While the panel animates out it is no longer part of the experience:
+         hiding it keeps screen readers from announcing a stale dialog. */
+      aria-hidden={visible ? undefined : true}
+      data-state={visible ? "open" : "closed"}
+    >
       {/* Backdrop is intentionally inert: modals close only via the X button or a save. */}
       <div
         aria-hidden="true"
