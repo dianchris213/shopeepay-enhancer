@@ -81,8 +81,9 @@ describe("wallet defaults stay put across bookings", () => {
     await user.click(screen.getByRole("button", { name: /Simpan|Save/i }));
     await waitFor(() => expect(getState().transactions.length).toBe(2));
 
-    const kinds = getState().transactions.map((t) => t.type);
-    expect(kinds).toContain("income");
-    expect(kinds).toContain("expense");
+    const amounts = getState().transactions.map((t) => t.amount);
+    expect(amounts.some((a) => a > 0)).toBe(true);
+    expect(amounts.some((a) => a < 0)).toBe(true);
   });
+
 });
