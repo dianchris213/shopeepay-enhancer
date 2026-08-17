@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.enforce_shopeepay_expense_category() FROM PUBLIC, anon, authenticated;
