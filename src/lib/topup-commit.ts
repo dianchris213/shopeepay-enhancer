@@ -15,7 +15,7 @@ export type TopUpCommit = (input: {
   accountId: string;
   amount: number;
   source: string;
-  transactionId?: string;
+  transactionId?: string | undefined;
 }) => Promise<{ ok: boolean; error?: string }>;
 
 let handler: TopUpCommit | null = null;

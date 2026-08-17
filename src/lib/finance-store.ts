@@ -452,8 +452,8 @@ export function topUpAccount(
 export function revertTopUp(input: {
   accountId: string;
   amount: number;
-  transactionId?: string;
-  notificationId?: string;
+  transactionId?: string | undefined;
+  notificationId?: string | undefined;
 }): MutationResult {
   const { accountId, amount, transactionId, notificationId } = input;
   const account = state.accounts.find((a) => a.id === accountId);
