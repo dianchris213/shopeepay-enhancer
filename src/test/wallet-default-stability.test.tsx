@@ -65,6 +65,9 @@ describe("wallet defaults stay put across bookings", () => {
     await user.click(screen.getByRole("button", { name: /Pemasukan|income/i }));
     expect(pressedWallet()).toBe("Driver Shoopee");
 
+    // The driver wallet only accepts COD rows, so this income is booked on the
+    // custom wallet — a manual pick, not a default change.
+    await user.click(screen.getByRole("button", { name: "Dana Custom" }));
     await user.type(screen.getByLabelText("Amount in rupiah"), "50000");
     await user.click(screen.getByRole("button", { name: "Bonus" }));
     await user.click(screen.getByRole("button", { name: /Simpan|Save/i }));
