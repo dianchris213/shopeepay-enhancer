@@ -186,14 +186,14 @@ export function AddTransactionSheet({ open, onClose }: Props) {
     setCategoryId(null);
   }, [kind, selectedWallet?.id, isShopeeIncome, visibleCategories]);
 
-  /** Picking a Driver category books it on the persistent Shopee Pay wallet. */
-  function pickCategory(id: string, name: string) {
+  /**
+   * Picking a category never changes the wallet: the Shopeepay wallet must not
+   * be forced as a default on either the Pemasukan or Pengeluaran tab.
+   */
+  function pickCategory(id: string) {
     setCategoryId(id);
-    if (isDriverCategory(name)) {
-      const driver = shopeePayAccount();
-      if (driver) setWalletId(driver.id);
-    }
   }
+
 
   /** Switching the tab re-evaluates the category default. */
   function selectKind(nextKind: "expense" | "income") {
@@ -494,7 +494,7 @@ export function AddTransactionSheet({ open, onClose }: Props) {
             return (
               <button
                 key={item.id}
-                onClick={() => pickCategory(item.id, item.name)}
+                onClick={() => pickCategory(item.id)}
                 aria-pressed={isActive}
                 className="glass tap flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-3 text-center transition-colors duration-200"
                 style={
