@@ -98,7 +98,11 @@ export function AddTransactionSheet({ open, onClose }: Props) {
       accounts.find((a) => a.name === DEFAULT_CUSTOM_WALLET_NAME) ??
       accounts.find((a) => a.type === "Custom") ??
       null;
-    const pick = (w: typeof driver) => (w && !isShopeePayWallet(w) ? w : null);
+    // Only the literal "Shopeepay" wallet is barred from being a default; the
+    // "Driver Shoopee" wallet stays the income default.
+    const isNamedShopeePay = (w: typeof driver) =>
+      w?.name.replaceAll(/\s/g, "").toLowerCase() === "shopeepay";
+    const pick = (w: typeof driver) => (w && !isNamedShopeePay(w) ? w : null);
     const preferred =
       nextKind === "income" ? (pick(driver) ?? pick(custom)) : (pick(custom) ?? pick(driver));
     return preferred?.id ?? null;
