@@ -48,8 +48,8 @@ describe("wallet defaults stay put across bookings", () => {
       bills: [],
     });
     hydrateCategories([
-      { id: "bonus", name: "Bonus", icon: "salary", kind: "income" },
-      { id: "food", name: "Food", icon: "food", kind: "expense" },
+      { id: "bonus", name: "Bonus", icon: "salary", kind: "income", walletId: custom.id },
+      { id: "food", name: "Food", icon: "food", kind: "expense", walletId: custom.id },
     ]);
   });
 
