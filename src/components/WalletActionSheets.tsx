@@ -132,33 +132,65 @@ export function TopUpSheet({
   }, [open, presetAccountId]);
 
   const amount = Number(digits || 0);
-  const valid = amount > 0 && !!accountId && !done;
+  const valid = amount > 0 && !!accountId && !done && !pending;
 
-  function submit() {
+  /**
+   * Optimistic top up: the balance moves immediately, then the remote commit
+   * is awaited. A failed commit reverts the wallet to its previous amount and
+   * surfaces the failure toast.
+   */
+  async function submit() {
     if (!valid) return;
     const target = accounts.find((a) => a.id === accountId);
+    const previousBalance = target?.amount ?? 0;
     const result = topUpAccount(accountId, amount, source);
     if (!result.ok) {
       // reportMutation renders the precise reason; the title names the flow.
-      toast.error(
-        t("toast.topUpFailed"),
-        `${t("wa.topUpTitle")} · ${target?.name ?? ""}`.trim(),
-      );
+      toast.error(t("toast.topUpFailed"), `${t("wa.topUpTitle")} · ${target?.name ?? ""}`.trim());
       reportMutation(result, "wallet", lang);
       return;
     }
-    const newBalance = (target?.amount ?? 0) + amount;
+
+    // Optimistic success: show the new balance before the server confirms.
+    const newBalance = previousBalance + amount;
     toast.success(
       t("toast.topUpSuccess"),
       `${money(amount)} ${t("toast.topUpSuccessBody")}: ${money(newBalance)}`,
     );
     setDone(true);
+    setPending(true);
+
+    const commit = await commitTopUp({
+      accountId,
+      amount,
+      source,
+      transactionId: result.id,
+    });
+
+    if (!commit.ok) {
+      // Strict rollback: undo the optimistic mutation and tell the user.
+      revertTopUp({
+        accountId,
+        amount,
+        transactionId: result.id,
+        notificationId: result.notificationId,
+      });
+      setDone(false);
+      setPending(false);
+      toast.error(
+        t("toast.topUpFailed"),
+        `${t("toast.topUpReverted")} ${money(previousBalance)}`,
+      );
+      return;
+    }
+
+    setPending(false);
     window.setTimeout(onClose, 520);
   }
 
-
   return (
-    <Sheet open={open} onClose={onClose} title={t("wa.topUpTitle")}>
+    <Sheet id="topup-sheet" open={open} onClose={onClose} title={t("wa.topUpTitle")}>
+
       <AmountField digits={digits} onDigits={setDigits} accent="var(--income)" />
 
       <p className="mt-4 text-xs font-semibold tracking-tight">{t("wa.destination")}</p>
