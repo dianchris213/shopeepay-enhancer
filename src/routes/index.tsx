@@ -361,7 +361,7 @@ function Index() {
                     </div>
                   ))
                 : walletCards.map((card) => (
-                    <div key={card.id} role="listitem" className="contents">
+                    <div key={card.id} role="listitem" className="flex shrink-0 snap-start">
                       <button
                         type="button"
                         data-wallet-card=""
@@ -390,7 +390,7 @@ function Index() {
                   ))}
 
               {/* Compact "Isi Uang" action card, always last in the strip. */}
-              <div role="listitem" className="contents">
+              <div role="listitem" className="flex shrink-0 snap-start">
                 <button
                   type="button"
                   data-wallet-card=""
