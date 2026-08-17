@@ -38,7 +38,7 @@ describe("AddTransactionSheet defaults", () => {
     hydrateCategories([{ id: "cod", name: "Driver COD", icon: "transport", kind: "income" }]);
   });
 
-  it("opens with Shopeepay preselected as the wallet source", async () => {
+  it("opens with no wallet preselected when Shopeepay is the only fallback", async () => {
     render(<AddTransactionSheet open onClose={() => {}} />);
     await screen.findByRole("dialog");
 
@@ -46,10 +46,13 @@ describe("AddTransactionSheet defaults", () => {
     const active = Array.from(walletGroup.querySelectorAll("button")).find(
       (b) => b.getAttribute("aria-pressed") === "true",
     );
-    expect(active?.textContent?.trim()).toBe(shopeePayAccount()!.name);
-    // No expense category exists for that wallet yet, so the empty state shows.
+    // Shopeepay must never be auto-selected for Pemasukan or Pengeluaran.
+    expect(active).toBeUndefined();
+    expect(screen.queryByText(shopeePayAccount()!.name)).toBeTruthy();
+    // No wallet, so no categories: the empty state shows.
     expect(screen.getByTestId("tx-empty-categories")).toBeTruthy();
   });
+
 
 
   it("opens on Expense with no category selected and an interactive Settings hint", async () => {
