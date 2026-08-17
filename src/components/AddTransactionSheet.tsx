@@ -195,7 +195,9 @@ export function AddTransactionSheet({ open, onClose }: Props) {
   function selectKind(nextKind: "expense" | "income") {
     if (nextKind === kind) return;
     setKind(nextKind);
-    setWalletId(defaultWalletFor(nextKind));
+    // Keep the current wallet when the new tab has no preferred default:
+    // switching tabs must never silently drop the user's pick.
+    setWalletId(defaultWalletFor(nextKind) ?? walletId);
     setCategoryId(null);
     lastDefaults.current = null;
   }
