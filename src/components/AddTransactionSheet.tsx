@@ -86,8 +86,8 @@ export function AddTransactionSheet({ open, onClose }: Props) {
    * Default wallet sources when the form opens:
    *   - Pemasukan (Income)   -> "Driver Shoopee"
    *   - Pengeluaran (Expense) -> "Dana Custom"
-   * ShopeePay is never the default; it is only used as a last-resort fallback
-   * when neither preferred wallet exists on the account.
+   * ShopeePay is never used as a default or fallback: when neither preferred
+   * wallet exists the picker simply opens with nothing selected.
    */
   const defaultWalletFor = (nextKind: "expense" | "income") => {
     const driver =
@@ -98,11 +98,16 @@ export function AddTransactionSheet({ open, onClose }: Props) {
       accounts.find((a) => a.name === DEFAULT_CUSTOM_WALLET_NAME) ??
       accounts.find((a) => a.type === "Custom") ??
       null;
-    const shopee = accounts.find((a) => isShopeePayWallet(a)) ?? null;
+    // Only the literal "Shopeepay" wallet is barred from being a default; the
+    // "Driver Shoopee" wallet stays the income default.
+    const isNamedShopeePay = (w: typeof driver) =>
+      w?.name.replaceAll(/\s/g, "").toLowerCase() === "shopeepay";
+    const pick = (w: typeof driver) => (w && !isNamedShopeePay(w) ? w : null);
     const preferred =
-      nextKind === "income" ? (driver ?? custom ?? shopee) : (custom ?? driver ?? shopee);
+      nextKind === "income" ? (pick(driver) ?? pick(custom)) : (pick(custom) ?? pick(driver));
     return preferred?.id ?? null;
   };
+
 
 
   useEffect(() => {
@@ -194,7 +199,9 @@ export function AddTransactionSheet({ open, onClose }: Props) {
   function selectKind(nextKind: "expense" | "income") {
     if (nextKind === kind) return;
     setKind(nextKind);
-    setWalletId(defaultWalletFor(nextKind));
+    // Keep the current wallet when the new tab has no preferred default:
+    // switching tabs must never silently drop the user's pick.
+    setWalletId(defaultWalletFor(nextKind) ?? walletId);
     setCategoryId(null);
     lastDefaults.current = null;
   }
