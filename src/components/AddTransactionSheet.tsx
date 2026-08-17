@@ -86,8 +86,8 @@ export function AddTransactionSheet({ open, onClose }: Props) {
    * Default wallet sources when the form opens:
    *   - Pemasukan (Income)   -> "Driver Shoopee"
    *   - Pengeluaran (Expense) -> "Dana Custom"
-   * ShopeePay is never the default; it is only used as a last-resort fallback
-   * when neither preferred wallet exists on the account.
+   * ShopeePay is never used as a default or fallback: when neither preferred
+   * wallet exists the picker simply opens with nothing selected.
    */
   const defaultWalletFor = (nextKind: "expense" | "income") => {
     const driver =
@@ -98,11 +98,12 @@ export function AddTransactionSheet({ open, onClose }: Props) {
       accounts.find((a) => a.name === DEFAULT_CUSTOM_WALLET_NAME) ??
       accounts.find((a) => a.type === "Custom") ??
       null;
-    const shopee = accounts.find((a) => isShopeePayWallet(a)) ?? null;
+    const pick = (w: typeof driver) => (w && !isShopeePayWallet(w) ? w : null);
     const preferred =
-      nextKind === "income" ? (driver ?? custom ?? shopee) : (custom ?? driver ?? shopee);
+      nextKind === "income" ? (pick(driver) ?? pick(custom)) : (pick(custom) ?? pick(driver));
     return preferred?.id ?? null;
   };
+
 
 
   useEffect(() => {
