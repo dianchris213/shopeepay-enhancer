@@ -79,6 +79,10 @@ const en = {
   "toast.topUpSuccess": "Top up successful",
   "toast.topUpSuccessBody": "added. New balance",
   "toast.topUpFailed": "Top up failed",
+  "toast.topUpReverted": "Balance restored to its previous amount.",
+  "toast.topUpPending": "Saving top up…",
+  "wl.stripHint": "Swipe horizontally to see more wallets. Select a wallet to open its details.",
+  "wl.cardHint": "Wallet card. Activate to open details.",
 
   "wl.topUpSub": "Deposit",
   "wl.addAccount": "Add Account",
@@ -665,6 +669,10 @@ const id: Record<TranslationKey, string> = {
   "toast.topUpSuccess": "Isi uang berhasil",
   "toast.topUpSuccessBody": "ditambahkan. Saldo baru",
   "toast.topUpFailed": "Isi uang gagal",
+  "toast.topUpReverted": "Saldo dikembalikan ke jumlah sebelumnya.",
+  "toast.topUpPending": "Menyimpan isi uang…",
+  "wl.stripHint": "Geser ke samping untuk melihat dompet lain. Pilih dompet untuk membuka detail.",
+  "wl.cardHint": "Kartu dompet. Aktifkan untuk membuka detail.",
 
   "wl.topUpSub": "Setoran",
   "wl.addAccount": "Tambah Akun",
