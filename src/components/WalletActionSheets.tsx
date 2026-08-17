@@ -7,6 +7,7 @@ import {
   addAccount,
   walletNameTaken,
   topUpAccount,
+  revertTopUp,
   transferBetweenAccounts,
   useFinance,
   useMoney,
@@ -15,6 +16,7 @@ import {
 import { reportMutation } from "@/lib/mutation-feedback";
 import { useT } from "@/lib/i18n";
 import { toast } from "@/lib/toast-store";
+import { commitTopUp } from "@/lib/topup-commit";
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -112,6 +114,8 @@ export function TopUpSheet({
   const [accountId, setAccountId] = useState("");
   const [source, setSource] = useState(sources[0]!);
   const [done, setDone] = useState(false);
+  // True while the optimistic update waits for the remote confirmation.
+  const [pending, setPending] = useState(false);
 
   const accountsRef = useRef(accounts);
   accountsRef.current = accounts;
@@ -122,6 +126,7 @@ export function TopUpSheet({
     if (!open) return;
     setDigits("");
     setDone(false);
+    setPending(false);
     setSource(sources[0]!);
     const list = accountsRef.current;
     const preset =
