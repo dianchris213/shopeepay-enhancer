@@ -48,7 +48,7 @@ describe("wallet defaults stay put across bookings", () => {
       bills: [],
     });
     hydrateCategories([
-      { id: "cod", name: "Driver COD", icon: "transport", kind: "income" },
+      { id: "bonus", name: "Bonus", icon: "salary", kind: "income" },
       { id: "food", name: "Food", icon: "food", kind: "expense" },
     ]);
   });
@@ -66,7 +66,7 @@ describe("wallet defaults stay put across bookings", () => {
     expect(pressedWallet()).toBe("Driver Shoopee");
 
     await user.type(screen.getByLabelText("Amount in rupiah"), "50000");
-    await user.click(screen.getByRole("button", { name: "Driver COD" }));
+    await user.click(screen.getByRole("button", { name: "Bonus" }));
     await user.click(screen.getByRole("button", { name: /Simpan|Save/i }));
     await waitFor(() => expect(getState().transactions.length).toBe(1));
     unmount();
