@@ -319,22 +319,40 @@ function Index() {
               </button>
             </div>
 
-            {/* Swipeable wallet strip — drag with a mouse on desktop, swipe on
-                touch, Tab + Left/Right arrows on a keyboard. */}
+            {/* Swipeable wallet strip — drag with a mouse on desktop, native
+                touch swipe on mobile, Tab + Left/Right arrows on a keyboard. */}
+            <p id="wallet-strip-hint" className="sr-only">
+              {t("wl.stripHint")}
+            </p>
+            <p id="wallet-card-hint" className="sr-only">
+              {t("wl.cardHint")}
+            </p>
             <div
               ref={strip.ref}
               {...strip.dragProps}
               onKeyDown={onStripKeyDown}
-              role="group"
+              role="list"
               aria-label={t("nav.wallets")}
+              aria-describedby="wallet-strip-hint"
               aria-busy={refreshing}
               data-testid="stream-strip"
+              /* pan-x keeps the horizontal gesture on the strip while vertical
+                 swipes still scroll the page; contain stops the page from
+                 rubber-banding when the strip hits an edge. */
+              style={{
+                touchAction: "pan-x",
+                overscrollBehaviorX: "contain",
+                WebkitOverflowScrolling: "touch",
+                scrollBehavior: "smooth",
+              }}
               className="scroll-slim-x -mx-1 mt-1 flex w-full cursor-grab snap-x snap-mandatory items-stretch gap-2.5 overflow-x-auto px-1 pt-0.5 pb-2 active:cursor-grabbing"
             >
               {refreshing
                 ? walletCards.map((card) => (
                     <div
                       key={card.id}
+                      role="listitem"
+                      aria-hidden="true"
                       data-testid="wallet-card-skeleton"
                       className="glass border-foreground/10 h-[62px] min-w-[136px] shrink-0 animate-pulse rounded-2xl border px-3.5 py-2.5"
                     >
@@ -343,45 +361,58 @@ function Index() {
                     </div>
                   ))
                 : walletCards.map((card) => (
-                    <button
-                      key={card.id}
-                      data-wallet-card=""
-                      onClick={() => {
-                        if (strip.didDrag()) return;
-                        card.onClick();
-                      }}
-                      data-testid={card.testId}
-                      aria-label={`${card.label}: ${money(card.amount)}`}
-                      className="glass tap border-foreground/10 hover:border-foreground/20 hover:bg-foreground/10 focus-visible:ring-primary/60 flex h-[62px] min-w-[136px] shrink-0 snap-start flex-col justify-between rounded-2xl border px-3.5 py-2.5 text-left transition-all duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:outline-none active:scale-95"
-                    >
-                      <p className="text-muted-foreground truncate text-[9px] font-medium tracking-wider uppercase">
-                        {card.label}
-                      </p>
-                      <p
-                        className={`truncate text-sm font-semibold tabular-nums ${
-                          card.amount < 0 ? "text-expense" : "text-income"
-                        }`}
+                    <div key={card.id} role="listitem" className="contents">
+                      <button
+                        type="button"
+                        data-wallet-card=""
+                        onClick={() => {
+                          if (strip.didDrag()) return;
+                          card.onClick();
+                        }}
+                        data-testid={card.testId}
+                        role="button"
+                        aria-label={`${card.label}: ${money(card.amount)}`}
+                        aria-describedby="wallet-card-hint"
+                        className="glass tap border-foreground/10 hover:border-foreground/20 hover:bg-foreground/10 focus-visible:ring-primary/60 flex h-[62px] min-w-[136px] shrink-0 snap-start flex-col justify-between rounded-2xl border px-3.5 py-2.5 text-left transition-all duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:outline-none active:scale-95"
                       >
-                        {money(card.amount)}
-                      </p>
-                    </button>
+                        <p className="text-muted-foreground truncate text-[9px] font-medium tracking-wider uppercase">
+                          {card.label}
+                        </p>
+                        <p
+                          className={`truncate text-sm font-semibold tabular-nums ${
+                            card.amount < 0 ? "text-expense" : "text-income"
+                          }`}
+                        >
+                          {money(card.amount)}
+                        </p>
+                      </button>
+                    </div>
                   ))}
 
               {/* Compact "Isi Uang" action card, always last in the strip. */}
-              <button
-                data-wallet-card=""
-                onClick={() => {
-                  if (strip.didDrag()) return;
-                  setTopUpOpen(true);
-                }}
-                data-testid="stream-card-topup"
-                aria-label={t("wl.topUpCta")}
-                className="glass tap border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary focus-visible:ring-primary/60 flex h-[62px] min-w-[112px] shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-2xl border border-dashed transition-all duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:outline-none active:scale-95"
-              >
-                <Plus className="size-4" strokeWidth={2.2} />
-                <span className="text-[10px] font-semibold tracking-wide">{t("wl.topUpCta")}</span>
-              </button>
+              <div role="listitem" className="contents">
+                <button
+                  type="button"
+                  data-wallet-card=""
+                  onClick={() => {
+                    if (strip.didDrag()) return;
+                    setTopUpOpen(true);
+                  }}
+                  data-testid="stream-card-topup"
+                  aria-label={t("wl.topUpCta")}
+                  aria-haspopup="dialog"
+                  aria-expanded={topUpOpen}
+                  aria-controls="topup-sheet"
+                  className="glass tap border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary focus-visible:ring-primary/60 flex h-[62px] min-w-[112px] shrink-0 snap-start flex-col items-center justify-center gap-1 rounded-2xl border border-dashed transition-all duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:outline-none active:scale-95"
+                >
+                  <Plus className="size-4" strokeWidth={2.2} />
+                  <span className="text-[10px] font-semibold tracking-wide">
+                    {t("wl.topUpCta")}
+                  </span>
+                </button>
+              </div>
             </div>
+
 
           </section>
         </WidgetErrorBoundary>
