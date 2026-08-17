@@ -402,10 +402,25 @@ export function transferBetweenAccounts(
   return { ok: true };
 }
 
-export function topUpAccount(accountId: string, amount: number, source: string): MutationResult {
+/**
+ * Applies a top up locally (optimistically). The returned `id` is the ledger
+ * entry that `revertTopUp` needs to roll the change back when the remote
+ * write fails.
+ */
+export function topUpAccount(
+  accountId: string,
+  amount: number,
+  source: string,
+): MutationResult & { id?: string; notificationId?: string } {
   const account = state.accounts.find((a) => a.id === accountId);
   if (!account) return { ok: false, reason: "not-found" };
   if (!(amount > 0)) return { ok: false, reason: "invalid-amount" };
+  const txId = id();
+  const notification = notify(
+    "Top up complete",
+    `${formatAmount(amount, state.settings.currency)} added to ${account.name}.`,
+    "income",
+  );
   set({
     ...state,
     accounts: state.accounts.map((a) =>
@@ -413,7 +428,7 @@ export function topUpAccount(accountId: string, amount: number, source: string):
     ),
     transactions: [
       {
-        id: id(),
+        id: txId,
         name: `Top Up · ${source}`,
         walletId: account.id,
         via: account.name,
@@ -424,17 +439,43 @@ export function topUpAccount(accountId: string, amount: number, source: string):
       },
       ...state.transactions,
     ],
-    notifications: [
-      notify(
-        "Top up complete",
-        `${formatAmount(amount, state.settings.currency)} added to ${account.name}.`,
-        "income",
-      ),
-      ...state.notifications,
-    ],
+    notifications: [notification, ...state.notifications],
+  });
+  return { ok: true, id: txId, notificationId: notification.id };
+}
+
+/**
+ * Rollback for an optimistic top up: removes the ledger entry (and its
+ * notification) and restores the wallet balance to the pre-top-up amount.
+ * Safe to call twice — a missing transaction makes it a no-op.
+ */
+export function revertTopUp(input: {
+  accountId: string;
+  amount: number;
+  transactionId?: string;
+  notificationId?: string;
+}): MutationResult {
+  const { accountId, amount, transactionId, notificationId } = input;
+  const account = state.accounts.find((a) => a.id === accountId);
+  if (!account) return { ok: false, reason: "not-found" };
+  if (transactionId && !state.transactions.some((tx) => tx.id === transactionId)) {
+    return { ok: true };
+  }
+  set({
+    ...state,
+    accounts: state.accounts.map((a) =>
+      a.id === accountId ? { ...a, amount: a.amount - amount } : a,
+    ),
+    transactions: transactionId
+      ? state.transactions.filter((tx) => tx.id !== transactionId)
+      : state.transactions,
+    notifications: notificationId
+      ? state.notifications.filter((n) => n.id !== notificationId)
+      : state.notifications,
   });
   return { ok: true };
 }
+
 
 const palette = [
   "var(--chart-1)",
