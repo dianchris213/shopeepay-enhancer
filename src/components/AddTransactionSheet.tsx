@@ -494,7 +494,7 @@ export function AddTransactionSheet({ open, onClose }: Props) {
             return (
               <button
                 key={item.id}
-                onClick={() => pickCategory(item.id, item.name)}
+                onClick={() => pickCategory(item.id)}
                 aria-pressed={isActive}
                 className="glass tap flex min-w-0 flex-col items-center gap-1.5 rounded-2xl px-1.5 py-3 text-center transition-colors duration-200"
                 style={
