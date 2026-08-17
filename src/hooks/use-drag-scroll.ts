@@ -24,6 +24,7 @@ export function useDragScroll<T extends HTMLElement>() {
     const el = ref.current;
     if (!el || e.button !== 0) return;
     state.current = { down: true, startX: e.pageX, startLeft: el.scrollLeft, moved: false };
+    touch.current.moved = false;
   }, []);
 
   const end = useCallback(() => {
