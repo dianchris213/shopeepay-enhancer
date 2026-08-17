@@ -53,6 +53,10 @@ export function ToastHost() {
           <div
             key={item.id}
             role={item.tone === "error" ? "alert" : "status"}
+            /* Errors interrupt the screen reader; everything else waits for a
+               pause. Per-item live regions override the polite container. */
+            aria-live={item.tone === "error" ? "assertive" : "polite"}
+            aria-atomic="true"
             className="glass animate-fade-in pointer-events-auto flex items-start gap-3 rounded-2xl px-3.5 py-3"
             style={{
               borderColor: `color-mix(in oklab, ${color} 45%, transparent)`,

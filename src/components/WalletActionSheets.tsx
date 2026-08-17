@@ -216,6 +216,10 @@ export function TopUpSheet({
         ))}
       </div>
 
+      <p aria-live="polite" className="sr-only" data-testid="topup-status">
+        {pending ? t("toast.topUpPending") : ""}
+      </p>
+
       <PrimaryButton disabled={!valid} onClick={submit}>
         {done ? (
           <>
